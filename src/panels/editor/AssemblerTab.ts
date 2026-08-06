@@ -61,10 +61,7 @@ export class AssemblerTab {
     injectButton.type = "button";
     injectButton.className = "assembler-tab__inject-button";
     injectButton.textContent = "Send to editor";
-    injectButton.addEventListener("click", () => {
-      injectIntoEditor(this.lastAssembledCode);
-      this.onInject();
-    });
+    injectButton.addEventListener("click", () => this.sendToEditor());
 
     orderColumn.append(
       this.headContainer,
@@ -82,6 +79,11 @@ export class AssemblerTab {
     });
 
     void this.refreshPalette();
+  }
+
+  sendToEditor(): void {
+    injectIntoEditor(this.lastAssembledCode);
+    this.onInject();
   }
 
   async refreshPalette(): Promise<void> {

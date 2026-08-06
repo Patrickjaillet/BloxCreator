@@ -11,6 +11,7 @@ const TOAST_DURATION_MS = 6000;
 
 export class LibraryPanel {
   readonly element: HTMLDivElement;
+  private readonly searchBar: SearchBar;
   private readonly chipsContainer: HTMLDivElement;
   private readonly treeContainer: HTMLDivElement;
   private readonly toastContainer: HTMLDivElement;
@@ -20,7 +21,7 @@ export class LibraryPanel {
     this.element = document.createElement("div");
     this.element.className = "library-panel";
 
-    const searchBar = new SearchBar((query) => void this.handleSearch(query));
+    this.searchBar = new SearchBar((query) => void this.handleSearch(query));
     const importDropzone = new ImportDropzone((report) => this.handleImportReport(report));
 
     this.chipsContainer = document.createElement("div");
@@ -33,7 +34,7 @@ export class LibraryPanel {
     this.toastContainer.className = "library-panel__toast-container";
 
     this.element.append(
-      searchBar.element,
+      this.searchBar.element,
       importDropzone.element,
       this.chipsContainer,
       this.treeContainer,
@@ -46,6 +47,10 @@ export class LibraryPanel {
     });
 
     void refreshLibrary();
+  }
+
+  focusSearch(): void {
+    this.searchBar.focus();
   }
 
   private async handleSearch(query: string): Promise<void> {

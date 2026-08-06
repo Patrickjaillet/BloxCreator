@@ -18,8 +18,8 @@ export class ViewportPanel {
     });
 
     this.toolbar = new ControlsToolbar(
-      () => this.handleTogglePlay(),
-      () => this.handleReset(),
+      () => this.togglePlay(),
+      () => this.resetTime(),
       onErrorLineClick,
     );
 
@@ -40,14 +40,14 @@ export class ViewportPanel {
     this.renderer.compile(appStore.getState().monacoContent);
   }
 
-  private handleTogglePlay(): void {
+  togglePlay(): void {
     const playing = !this.renderer.isPlaying();
     this.renderer.setPlaying(playing);
     this.toolbar.setPlaying(playing);
     appStore.setState({ viewport: { ...appStore.getState().viewport, playing } });
   }
 
-  private handleReset(): void {
+  resetTime(): void {
     this.renderer.reset();
     appStore.setState({ viewport: { ...appStore.getState().viewport, time: 0 } });
   }

@@ -7,12 +7,7 @@ void main() {
 }
 `;
 
-/**
- * Wraps the user's assembled GLSL (function/struct blocks + mainImage) with
- * the standard Shadertoy-style uniforms, per spec 7.3.
- */
-export function wrapFragmentShader(userCode: string): string {
-  return `#version 300 es
+const FRAGMENT_SHADER_HEADER = `#version 300 es
 precision highp float;
 uniform vec3  iResolution;
 uniform float iTime;
@@ -23,12 +18,37 @@ uniform vec4  iDate;
 uniform float iFrameRate;
 out vec4 fragColor;
 
-${userCode}
+`;
+
+const FRAGMENT_SHADER_FOOTER = `
 
 void main() {
     mainImage(fragColor, gl_FragCoord.xy);
 }
 `;
+
+/** Number of header lines preceding the user's code in the wrapped shader (spec 7.3). */
+const USER_CODE_LINE_OFFSET = (FRAGMENT_SHADER_HEADER.match(/\n/g) ?? []).length;
+
+/**
+ * Wraps the user's assembled GLSL (function/struct blocks + mainImage) with
+ * the standard Shadertoy-style uniforms, per spec 7.3.
+ */
+export function wrapFragmentShader(userCode: string): string {
+  return `${FRAGMENT_SHADER_HEADER}${userCode}${FRAGMENT_SHADER_FOOTER}`;
+}
+
+/**
+ * Converts a line number from the compiled (wrapped) shader back to the
+ * corresponding line in the user's own code, so Monaco decorations land on
+ * the right line (spec 7.5). Errors inside the fixed header/footer (e.g. the
+ * generated `mainImage(...)` call site) are clamped to the nearest edge of
+ * the user's code rather than pointing at a nonexistent line.
+ */
+export function mapCompiledLineToUserLine(compiledLine: number, userCode: string): number {
+  const userLineCount = Math.max(1, userCode.split("\n").length);
+  const userLine = compiledLine - USER_CODE_LINE_OFFSET;
+  return Math.min(Math.max(userLine, 1), userLineCount);
 }
 
 const ERROR_LINE_RE = /ERROR:\s*\d+:(\d+):\s*(.+)/g;
@@ -71,6 +91,13 @@ function compileShader(
   return shader;
 }
 
+function remapToUserCode(error: ShaderCompileError, userCode: string): ShaderCompileError {
+  return new ShaderCompileError(
+    error.errors.map((e) => ({ ...e, line: mapCompiledLineToUserLine(e.line, userCode) })),
+    error.rawLog,
+  );
+}
+
 export function compileProgram(
   gl: WebGL2RenderingContext,
   userCode: string,
@@ -82,7 +109,7 @@ export function compileProgram(
     fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, wrapFragmentShader(userCode));
   } catch (err) {
     gl.deleteShader(vertexShader);
-    throw err;
+    throw err instanceof ShaderCompileError ? remapToUserCode(err, userCode) : err;
   }
 
   const program = gl.createProgram();
@@ -101,7 +128,7 @@ export function compileProgram(
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     const log = gl.getProgramInfoLog(program) ?? "unknown link error";
     gl.deleteProgram(program);
-    throw new ShaderCompileError(parseCompileErrors(log), log);
+    throw remapToUserCode(new ShaderCompileError(parseCompileErrors(log), log), userCode);
   }
 
   return program;

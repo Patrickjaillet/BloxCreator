@@ -91,6 +91,11 @@ export class EditorPanel {
     this.monacoHost.revealLine(line);
   }
 
+  injectAssemblerOutput(): void {
+    this.assemblerTab.sendToEditor();
+    this.switchTab("editor");
+  }
+
   private switchTab(tab: EditorTab): void {
     this.editorTabContent.style.display = tab === "editor" ? "" : "none";
     this.assemblerTabContent.style.display = tab === "assembler" ? "" : "none";
