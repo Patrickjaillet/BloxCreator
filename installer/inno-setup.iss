@@ -6,7 +6,7 @@
 ; (single source of truth per spec 17) before cutting a release build.
 
 #define AppName "Blox Creator"
-#define AppVersion "0.1.0"
+#define AppVersion "1.0.0"
 #define AppPublisher "Patrick JAILLET"
 #define AppPublisherURL "https://patrickjaillet.github.io/sandefjord-software"
 #define AppExeName "bloxcreator.exe"

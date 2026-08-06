@@ -3,7 +3,7 @@
 All notable changes to this project are documented in this file, grouped by
 version following [Semantic Versioning](https://semver.org/).
 
-## [0.1.0-dev] - 2026-08-06
+## [1.0.0] - 2026-08-06
 
 ### Added
 
@@ -20,4 +20,4 @@ version following [Semantic Versioning](https://semver.org/).
 
 ### Notes
 
-- The application is still in initial development (`0.x`); no `1.0.0` release has been cut yet.
+- The Windows build (NSIS and MSI) has been produced and smoke-tested. The Linux and macOS bundle targets are configured but have not been built or tested on those platforms.

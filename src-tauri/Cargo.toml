@@ -1,6 +1,6 @@
 [package]
 name = "bloxcreator"
-version = "0.1.0"
+version = "1.0.0"
 description = "Blox Creator - offline GLSL shader block manager and assembler"
 authors = ["Patrick JAILLET <sandefjord.development@proton.me>"]
 license = "MIT"

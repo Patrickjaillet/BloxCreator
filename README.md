@@ -4,7 +4,7 @@ Offline desktop application to manage and assemble reusable GLSL code blocks int
 
 ## Status
 
-Early development (`v0.1.0-dev`). The core pipeline is functional end-to-end: import a Markdown block library or decompose pasted GLSL, browse and search the block database, assemble blocks visually with live conflict detection, and preview the result in real time. See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for details.
+`v1.0.0`. The core pipeline is functional end-to-end: import a Markdown block library or decompose pasted GLSL, browse and search the block database, assemble blocks visually with live conflict detection, and preview the result in real time. The Windows build (NSIS/MSI) has been produced and tested; the Linux and macOS bundle targets are configured but not yet built or tested on those platforms. See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for details.
 
 ## Features
 
