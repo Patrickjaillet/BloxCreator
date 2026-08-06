@@ -13,7 +13,7 @@ use commands::blocks::{
 };
 use commands::import::{
     confirm_fragment_import, decompose_monaco_content, import_markdown_content,
-    import_markdown_file,
+    import_markdown_file, import_seed_library_if_empty,
 };
 use commands::shaders::{
     assemble_shader_preview, delete_shader, export_shader_as_glsl, list_shaders, load_shader,
@@ -35,6 +35,7 @@ pub fn run() {
             std::fs::create_dir_all(&app_data_dir)?;
             let db_path = app_data_dir.join("blox_creator.db");
             let conn = db::init_connection(&db_path)?;
+            import_seed_library_if_empty(&conn)?;
             app.manage(db::Db(std::sync::Mutex::new(conn)));
             Ok(())
         })

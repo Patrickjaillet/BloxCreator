@@ -33,6 +33,7 @@ fn import_markdown_str(
     conn: &Connection,
     content: &str,
     source_label: &str,
+    source_origin: &str,
 ) -> Result<ImportReport, AppError> {
     let parsed = parse_markdown(content);
     let mut report = ImportReport {
@@ -66,7 +67,7 @@ fn import_markdown_str(
             code_normalized,
             block_kind,
             tags: None,
-            source_origin: "markdown_import".to_string(),
+            source_origin: source_origin.to_string(),
             source_file: Some(source_label.to_string()),
         };
 
@@ -90,7 +91,7 @@ fn import_markdown_str(
 pub fn import_markdown_file(db: State<Db>, path: String) -> Result<ImportReport, AppError> {
     let content = std::fs::read_to_string(&path)?;
     let conn = db.0.lock().unwrap();
-    import_markdown_str(&conn, &content, &path)
+    import_markdown_str(&conn, &content, &path, "markdown_import")
 }
 
 #[tauri::command]
@@ -100,7 +101,21 @@ pub fn import_markdown_content(
     source_label: String,
 ) -> Result<ImportReport, AppError> {
     let conn = db.0.lock().unwrap();
-    import_markdown_str(&conn, &content, &source_label)
+    import_markdown_str(&conn, &content, &source_label, "markdown_import")
+}
+
+const SEED_LIBRARY_MD: &str =
+    include_str!("../../../seed/Reusable_Blocks_Library_Volumetric_Shaders.md");
+
+/// Imports the bundled seed library (spec 14) on first launch, i.e. only
+/// while the `blocks` table is still empty. The seed content is embedded in
+/// the binary at compile time so it is available regardless of the install
+/// layout (offline-first: no dependency on a `seed/` folder next to the exe).
+pub fn import_seed_library_if_empty(conn: &Connection) -> Result<ImportReport, AppError> {
+    if !repository::list_blocks(conn)?.is_empty() {
+        return Ok(ImportReport::default());
+    }
+    import_markdown_str(conn, SEED_LIBRARY_MD, "seed", "seed_md")
 }
 
 #[tauri::command]
@@ -184,7 +199,7 @@ mod tests {
     #[test]
     fn imports_all_27_seed_blocks_with_zero_duplicates_on_first_pass() {
         let conn = setup_conn();
-        let report = import_markdown_str(&conn, SEED, "seed").unwrap();
+        let report = import_markdown_str(&conn, SEED, "seed", "seed_md").unwrap();
         assert_eq!(report.total_found, 27);
         assert_eq!(report.inserted.len(), 27);
         assert_eq!(report.duplicates.len(), 0);
@@ -197,8 +212,8 @@ mod tests {
     #[test]
     fn reimporting_the_same_content_reports_27_duplicates() {
         let conn = setup_conn();
-        import_markdown_str(&conn, SEED, "seed").unwrap();
-        let second = import_markdown_str(&conn, SEED, "seed").unwrap();
+        import_markdown_str(&conn, SEED, "seed", "seed_md").unwrap();
+        let second = import_markdown_str(&conn, SEED, "seed", "seed_md").unwrap();
         assert_eq!(second.inserted.len(), 0);
         assert_eq!(second.duplicates.len(), 27);
     }
@@ -206,13 +221,40 @@ mod tests {
     #[test]
     fn reuses_existing_genre_instead_of_duplicating_it() {
         let conn = setup_conn();
-        import_markdown_str(&conn, SEED, "seed").unwrap();
+        import_markdown_str(&conn, SEED, "seed", "seed_md").unwrap();
         let genres_after_first = repository::list_genres(&conn).unwrap().len();
         // A second distinct block under an existing genre should not create a new genre row.
         let extra = "# 1. Camera & Ray Projection\n\n### 1.6 — Extra Block\n\n```glsl\nfloat extra = 42.0;\n```\n\n**Role:** r\n\n**Adaptation:** a\n\n**Summary:** s\n";
-        import_markdown_str(&conn, extra, "extra").unwrap();
+        import_markdown_str(&conn, extra, "extra", "markdown_import").unwrap();
         let genres_after_second = repository::list_genres(&conn).unwrap().len();
         assert_eq!(genres_after_first, genres_after_second);
+    }
+
+    #[test]
+    fn seed_import_runs_on_first_launch_with_27_unique_hashes_and_seed_md_origin() {
+        let conn = setup_conn();
+        let report = import_seed_library_if_empty(&conn).unwrap();
+        assert_eq!(report.inserted.len(), 27);
+        assert_eq!(report.duplicates.len(), 0);
+
+        let blocks = repository::list_blocks(&conn).unwrap();
+        assert_eq!(blocks.len(), 27);
+        assert!(blocks.iter().all(|b| b.source_origin == "seed_md"));
+
+        let unique_hashes: std::collections::HashSet<&str> =
+            blocks.iter().map(|b| b.hash.as_str()).collect();
+        assert_eq!(unique_hashes.len(), 27);
+    }
+
+    #[test]
+    fn seed_import_is_skipped_once_the_table_is_no_longer_empty() {
+        let conn = setup_conn();
+        import_seed_library_if_empty(&conn).unwrap();
+        // A second call must be a no-op (spec 14: only runs "si la table blocks est vide").
+        let second = import_seed_library_if_empty(&conn).unwrap();
+        assert_eq!(second.inserted.len(), 0);
+        assert_eq!(second.duplicates.len(), 0);
+        assert_eq!(repository::list_blocks(&conn).unwrap().len(), 27);
     }
 
     #[test]
