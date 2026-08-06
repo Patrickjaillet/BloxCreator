@@ -30,8 +30,6 @@ fn map_block(row: &rusqlite::Row) -> rusqlite::Result<BlockDto> {
 const BLOCK_COLUMNS: &str = "id, hash, name, genre_id, category_id, role, adaptation, summary, \
     code_raw, code_normalized, block_kind, tags, source_origin, source_file, created_at, updated_at";
 
-// --- Genres ---
-
 pub fn insert_genre(conn: &Connection, name: &str, display_order: i64) -> Result<i64, AppError> {
     conn.execute(
         "INSERT INTO genres (name, display_order) VALUES (?1, ?2)",
@@ -69,8 +67,6 @@ pub fn find_genre_by_name(conn: &Connection, name: &str) -> Result<Option<GenreD
     .optional()
     .map_err(AppError::from)
 }
-
-// --- Categories ---
 
 pub fn insert_category(
     conn: &Connection,
@@ -123,8 +119,6 @@ pub fn find_category_by_name(
     .optional()
     .map_err(AppError::from)
 }
-
-// --- Blocks ---
 
 pub fn find_block_by_hash(conn: &Connection, hash: &str) -> Result<Option<BlockDto>, AppError> {
     let sql = format!("SELECT {BLOCK_COLUMNS} FROM blocks WHERE hash = ?1");
@@ -228,8 +222,6 @@ pub fn search_blocks(conn: &Connection, query: &str) -> Result<Vec<BlockDto>, Ap
     rows.collect::<rusqlite::Result<Vec<_>>>()
         .map_err(AppError::from)
 }
-
-// --- Shaders ---
 
 pub fn insert_shader(conn: &Connection, input: &NewShaderInput) -> Result<i64, AppError> {
     if let Some(existing) = find_shader_by_hash(conn, &input.hash)? {

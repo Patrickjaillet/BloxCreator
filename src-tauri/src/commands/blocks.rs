@@ -184,7 +184,6 @@ mod tests {
         let renamed = rename_function(code, "smoothMin", "smoothMin2");
         assert!(renamed.contains("float smoothMin2(float a, float b)"));
         assert!(renamed.contains("smoothMin2(1.0, 2.0)"));
-        // must not touch the unrelated identifier that merely contains the same prefix
         assert!(renamed.contains("smoothMinExtra"));
         assert!(!renamed.contains("smoothMinExtra2"));
     }

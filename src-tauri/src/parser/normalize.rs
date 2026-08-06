@@ -34,7 +34,6 @@ mod tests {
 
     #[test]
     fn block_comments_do_not_nest() {
-        // GLSL, like C, has no nested block comments: the first `*/` closes it.
         assert_eq!(
             normalize_glsl("/* outer /* inner */ float a = 1.0;"),
             "float a = 1.0;"

@@ -13,11 +13,6 @@ import type {
   UpdateBlockInput,
 } from "../types/dto";
 
-/**
- * One entry per Rust `#[tauri::command]` (spec 4.5). Argument keys use the
- * camelCase form Tauri's IPC layer expects on the JS side for each Rust
- * command parameter name.
- */
 interface CommandMap {
   get_app_version: { args: Record<string, never>; result: string };
 

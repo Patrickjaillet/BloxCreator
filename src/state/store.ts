@@ -2,7 +2,6 @@ import type { BlockDto, BlockFilter, FunctionConflict, GenreTreeDto } from "../t
 
 export interface AssemblerEntry {
   blockId: number;
-  /** Global declarations pinned at the head, or the mandatory main_body pinned at the foot (spec 8.2). */
   locked: boolean;
 }
 

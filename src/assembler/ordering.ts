@@ -1,6 +1,5 @@
 import Sortable from "sortablejs";
 
-/** Drag-and-drop reordering of the middle (non-pinned) block list (spec 8.2). */
 export function createSortableList(
   container: HTMLElement,
   onReorder: (orderedBlockIds: number[]) => void,
@@ -17,7 +16,6 @@ export function createSortableList(
   });
 }
 
-/** Keyboard/mouse-accessible alternative to drag-and-drop (spec 8.2). */
 export function moveInArray<T>(items: readonly T[], index: number, direction: -1 | 1): T[] {
   const targetIndex = index + direction;
   if (targetIndex < 0 || targetIndex >= items.length) {

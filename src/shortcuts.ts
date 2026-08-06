@@ -19,7 +19,6 @@ function isEditableTarget(target: EventTarget | null): boolean {
   );
 }
 
-/** Global keyboard shortcuts per spec 9. Returns an unsubscribe function. */
 export function registerShortcuts(handlers: ShortcutHandlers): () => void {
   const onKeyDown = (event: KeyboardEvent): void => {
     const ctrl = event.ctrlKey || event.metaKey;

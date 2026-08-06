@@ -1,7 +1,6 @@
 import { callCommand } from "../api/ipc";
 import { appStore } from "./store";
 
-/** Ctrl+S (spec 9): persist the current Monaco content as a shader. */
 export async function saveCurrentShader(): Promise<void> {
   const name = window.prompt("Shader name?");
   if (!name || !name.trim()) {

@@ -7,7 +7,6 @@ export interface CodeEntry {
   code: string;
 }
 
-/** Mirrors the Rust detection in commands/shaders.rs (spec 8.3), run client-side for live preview. */
 export function detectFunctionConflicts(entries: CodeEntry[]): FunctionConflict[] {
   const firstSeen = new Map<string, number>();
   const conflicts: FunctionConflict[] = [];

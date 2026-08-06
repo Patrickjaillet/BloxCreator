@@ -107,10 +107,6 @@ pub fn import_markdown_content(
 const SEED_LIBRARY_MD: &str =
     include_str!("../../../seed/Reusable_Blocks_Library_Volumetric_Shaders.md");
 
-/// Imports the bundled seed library (spec 14) on first launch, i.e. only
-/// while the `blocks` table is still empty. The seed content is embedded in
-/// the binary at compile time so it is available regardless of the install
-/// layout (offline-first: no dependency on a `seed/` folder next to the exe).
 pub fn import_seed_library_if_empty(conn: &Connection) -> Result<ImportReport, AppError> {
     if !repository::list_blocks(conn)?.is_empty() {
         return Ok(ImportReport::default());
@@ -223,7 +219,6 @@ mod tests {
         let conn = setup_conn();
         import_markdown_str(&conn, SEED, "seed", "seed_md").unwrap();
         let genres_after_first = repository::list_genres(&conn).unwrap().len();
-        // A second distinct block under an existing genre should not create a new genre row.
         let extra = "# 1. Camera & Ray Projection\n\n### 1.6 — Extra Block\n\n```glsl\nfloat extra = 42.0;\n```\n\n**Role:** r\n\n**Adaptation:** a\n\n**Summary:** s\n";
         import_markdown_str(&conn, extra, "extra", "markdown_import").unwrap();
         let genres_after_second = repository::list_genres(&conn).unwrap().len();
@@ -250,7 +245,6 @@ mod tests {
     fn seed_import_is_skipped_once_the_table_is_no_longer_empty() {
         let conn = setup_conn();
         import_seed_library_if_empty(&conn).unwrap();
-        // A second call must be a no-op (spec 14: only runs "si la table blocks est vide").
         let second = import_seed_library_if_empty(&conn).unwrap();
         assert_eq!(second.inserted.len(), 0);
         assert_eq!(second.duplicates.len(), 0);

@@ -134,7 +134,6 @@ export interface AssembleResult {
   conflicts: FunctionConflict[];
 }
 
-/** Mirrors the externally-tagged serialization of the Rust `AppError` enum (error.rs). */
 export type AppError =
   | { database: string }
   | { parse: { line: number; message: string } }

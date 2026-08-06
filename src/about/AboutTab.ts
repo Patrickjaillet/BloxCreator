@@ -4,7 +4,6 @@ const COPYRIGHT_HOLDER = "Patrick JAILLET";
 const CONTACT_EMAIL = "sandefjord.development@proton.me";
 const WEBSITE_URL = "https://patrickjaillet.github.io/sandefjord-software";
 
-/** Static "About" content per spec 11: copyright, contact, license, dynamic version. */
 export class AboutTab {
   readonly element: HTMLButtonElement;
 
@@ -59,7 +58,7 @@ export class AboutTab {
     modal.appendChild(websiteLine);
 
     const licenseLine = document.createElement("p");
-    licenseLine.textContent = "Distribué sous licence MIT.";
+    licenseLine.textContent = "Distributed under the MIT license.";
     modal.appendChild(licenseLine);
 
     const closeButton = document.createElement("button");

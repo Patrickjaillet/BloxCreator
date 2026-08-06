@@ -42,9 +42,6 @@ static GLOBAL_DECL_RE: Lazy<Regex> = Lazy::new(|| {
     .unwrap()
 });
 
-/// Finds the byte offset of the `}` matching the `{` at `open_brace_pos`, by
-/// counting brace depth. Byte-level scanning is safe here: `{`/`}` are ASCII
-/// and never appear as part of a multi-byte UTF-8 sequence.
 fn find_matching_brace_end(source: &str, open_brace_pos: usize) -> Option<usize> {
     let bytes = source.as_bytes();
     let mut depth = 0i32;
@@ -77,9 +74,6 @@ fn flush_snippet(buffer: &mut Vec<&str>, fragments: &mut Vec<DecomposedFragment>
     buffer.clear();
 }
 
-/// Classifies the text lying between (or around) struct/function fragments:
-/// each line is either a global declaration/macro, or accumulated into a
-/// snippet fragment proposed for manual arbitration.
 fn append_residue_fragments(text: &str, fragments: &mut Vec<DecomposedFragment>) {
     let mut snippet_buffer: Vec<&str> = Vec::new();
 
@@ -229,11 +223,6 @@ mod tests {
 
     #[test]
     fn leftover_text_outside_declarations_becomes_a_snippet() {
-        // The first line syntactically matches the global-declaration pattern
-        // (type identifier = ...;) even though it is really a raymarching
-        // accumulator setup — this is the documented, regex-driven behavior
-        // from spec 4.4: matching lines are always classified as such, and
-        // only the remainder falls back to `snippet` for manual arbitration.
         let source = "vec3 q = vec3(0.0), p = vec3(0.0);\nq.yz += 0.6;\n// ... inside the raymarching loop:\np = q += (FC.rgb / r.y - 0.5) * e;\n";
         let fragments = decompose_monaco_content(source);
         assert_eq!(fragments.len(), 2);
@@ -258,12 +247,12 @@ mod tests {
         assert_eq!(
             kinds,
             vec![
-                FragmentKind::GlobalDeclaration, // #define ITERATIONS
-                FragmentKind::Struct,            // struct Light
-                FragmentKind::Function,          // hsv
-                FragmentKind::Snippet,           // stray comment (non-declaration line)
-                FragmentKind::GlobalDeclaration, // float strayValue
-                FragmentKind::MainBody,          // mainImage
+                FragmentKind::GlobalDeclaration,
+                FragmentKind::Struct,
+                FragmentKind::Function,
+                FragmentKind::Snippet,
+                FragmentKind::GlobalDeclaration,
+                FragmentKind::MainBody,
             ]
         );
         assert_eq!(fragments[2].name.as_deref(), Some("hsv"));
@@ -272,8 +261,6 @@ mod tests {
 
     #[test]
     fn is_never_auto_inserted_snippet_kind_is_distinguishable() {
-        // Snippets must remain distinguishable from validated kinds so the
-        // frontend can withhold automatic insertion until manual arbitration.
         let source = "// just a comment, no declaration or function here\n";
         let fragments = decompose_monaco_content(source);
         assert_eq!(fragments.len(), 1);

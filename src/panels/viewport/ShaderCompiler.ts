@@ -27,24 +27,12 @@ void main() {
 }
 `;
 
-/** Number of header lines preceding the user's code in the wrapped shader (spec 7.3). */
 const USER_CODE_LINE_OFFSET = (FRAGMENT_SHADER_HEADER.match(/\n/g) ?? []).length;
 
-/**
- * Wraps the user's assembled GLSL (function/struct blocks + mainImage) with
- * the standard Shadertoy-style uniforms, per spec 7.3.
- */
 export function wrapFragmentShader(userCode: string): string {
   return `${FRAGMENT_SHADER_HEADER}${userCode}${FRAGMENT_SHADER_FOOTER}`;
 }
 
-/**
- * Converts a line number from the compiled (wrapped) shader back to the
- * corresponding line in the user's own code, so Monaco decorations land on
- * the right line (spec 7.5). Errors inside the fixed header/footer (e.g. the
- * generated `mainImage(...)` call site) are clamped to the nearest edge of
- * the user's code rather than pointing at a nonexistent line.
- */
 export function mapCompiledLineToUserLine(compiledLine: number, userCode: string): number {
   const userLineCount = Math.max(1, userCode.split("\n").length);
   const userLine = compiledLine - USER_CODE_LINE_OFFSET;
@@ -53,7 +41,6 @@ export function mapCompiledLineToUserLine(compiledLine: number, userCode: string
 
 const ERROR_LINE_RE = /ERROR:\s*\d+:(\d+):\s*(.+)/g;
 
-/** Parses `gl.getShaderInfoLog` output into line-addressable errors (spec 7.5). */
 export function parseCompileErrors(infoLog: string): CompileError[] {
   const errors: CompileError[] = [];
   for (const match of infoLog.matchAll(ERROR_LINE_RE)) {

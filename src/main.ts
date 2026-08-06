@@ -29,9 +29,6 @@ async function bootstrap(): Promise<void> {
     appStore.setState({ monacoContent: block.codeRaw });
   });
 
-  // EditorPanel and ViewportPanel each need a callback into the other
-  // (inject-and-run, click-error-to-reveal-line); both closures resolve once
-  // both panels are constructed below.
   let viewportPanel: ViewportPanel | undefined;
   let editorPanel: EditorPanel | undefined;
 
