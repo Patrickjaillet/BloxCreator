@@ -1,6 +1,7 @@
 use serde::Serialize;
 
 #[derive(thiserror::Error, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum AppError {
     #[error("database error: {0}")]
     Database(String),
