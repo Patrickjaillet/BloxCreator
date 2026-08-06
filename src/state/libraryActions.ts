@@ -1,6 +1,6 @@
 import { callCommand } from "../api/ipc";
 import type { BlockDto } from "../types/dto";
-import { insertBeforeMainImage } from "./editorContent";
+import { integrateCodeByKind } from "./editorContent";
 import { appStore } from "./store";
 
 export async function refreshLibrary(): Promise<void> {
@@ -14,9 +14,5 @@ export async function refreshLibrary(): Promise<void> {
 
 export function integrateBlockIntoEditor(block: BlockDto): void {
   const current = appStore.getState().monacoContent;
-  const next =
-    block.blockKind === "main_body"
-      ? block.codeRaw
-      : insertBeforeMainImage(current, block.codeRaw);
-  appStore.setState({ monacoContent: next });
+  appStore.setState({ monacoContent: integrateCodeByKind(current, block) });
 }
