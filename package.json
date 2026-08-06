@@ -1,0 +1,24 @@
+{
+  "name": "bloxcreator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "monaco-editor": "^0.56.0",
+    "vite-plugin-monaco-editor": "^1.1.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^26.1.2",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3"
+  }
+}
