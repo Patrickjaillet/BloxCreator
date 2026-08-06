@@ -1,6 +1,7 @@
 import { callCommand } from "./api/ipc";
+import { EditorPanel } from "./panels/editor/EditorPanel";
 import { LibraryPanel } from "./panels/library/LibraryPanel";
-import type { BlockDto } from "./types/dto";
+import { appStore } from "./state/store";
 
 async function bootstrap(): Promise<void> {
   const appVersion = await callCommand("get_app_version", {});
@@ -12,11 +13,12 @@ async function bootstrap(): Promise<void> {
   }
   root.replaceChildren();
 
-  // Wired to the editor/assembler selection in a later phase.
-  const libraryPanel = new LibraryPanel((block: BlockDto) => {
-    console.log("selected block", block.id, block.name);
+  const libraryPanel = new LibraryPanel((block) => {
+    appStore.setState({ monacoContent: block.codeRaw });
   });
-  root.appendChild(libraryPanel.element);
+  const editorPanel = new EditorPanel();
+
+  root.append(libraryPanel.element, editorPanel.element);
 }
 
 window.addEventListener("DOMContentLoaded", () => {

@@ -1,4 +1,5 @@
 import { callCommand } from "../../api/ipc";
+import { refreshLibrary } from "../../state/libraryActions";
 import { appStore } from "../../state/store";
 import type { BlockDto, BlockFilter, GenreTreeDto, ImportReport } from "../../types/dto";
 import { BlockCard } from "./BlockCard";
@@ -43,16 +44,7 @@ export class LibraryPanel {
       this.renderTree(state.genres, state.blocks);
     });
 
-    void this.loadLibrary();
-  }
-
-  private async loadLibrary(): Promise<void> {
-    const filter = appStore.getState().activeFilter;
-    const [genres, blocks] = await Promise.all([
-      callCommand("get_genres_and_categories", {}),
-      callCommand("get_blocks", { filter }),
-    ]);
-    appStore.setState({ genres, blocks });
+    void refreshLibrary();
   }
 
   private async handleSearch(query: string): Promise<void> {
@@ -73,7 +65,7 @@ export class LibraryPanel {
   }
 
   private handleImportReport(report: ImportReport): void {
-    void this.loadLibrary();
+    void refreshLibrary();
     this.showImportToast(report);
   }
 
