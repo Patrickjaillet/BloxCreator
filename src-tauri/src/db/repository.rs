@@ -3,6 +3,7 @@ use rusqlite::{params, Connection, OptionalExtension};
 use crate::error::AppError;
 use crate::models::{
     BlockDto, CategoryDto, GenreDto, NewBlockInput, NewShaderInput, ShaderDto, ShaderSummaryDto,
+    UpdateBlockInput,
 };
 
 fn map_block(row: &rusqlite::Row) -> rusqlite::Result<BlockDto> {
@@ -184,9 +185,59 @@ pub fn delete_block(conn: &Connection, id: i64) -> Result<(), AppError> {
     Ok(())
 }
 
+pub fn update_block(
+    conn: &Connection,
+    id: i64,
+    patch: &UpdateBlockInput,
+) -> Result<BlockDto, AppError> {
+    let existing =
+        get_block(conn, id)?.ok_or_else(|| AppError::Database(format!("block {id} not found")))?;
+
+    let name = patch.name.clone().unwrap_or(existing.name);
+    let genre_id = patch.genre_id.unwrap_or(existing.genre_id);
+    let category_id = patch.category_id.or(existing.category_id);
+    let role = patch.role.clone().unwrap_or(existing.role);
+    let adaptation = patch.adaptation.clone().unwrap_or(existing.adaptation);
+    let summary = patch.summary.clone().unwrap_or(existing.summary);
+    let tags = patch.tags.clone().or(existing.tags);
+
+    conn.execute(
+        "UPDATE blocks SET name = ?1, genre_id = ?2, category_id = ?3, role = ?4, \
+         adaptation = ?5, summary = ?6, tags = ?7 WHERE id = ?8",
+        params![name, genre_id, category_id, role, adaptation, summary, tags, id],
+    )?;
+
+    get_block(conn, id)?.ok_or_else(|| AppError::Database("block update did not persist".into()))
+}
+
+pub fn search_blocks(conn: &Connection, query: &str) -> Result<Vec<BlockDto>, AppError> {
+    if query.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let sql = format!(
+        "SELECT b.id, b.hash, b.name, b.genre_id, b.category_id, b.role, b.adaptation, \
+         b.summary, b.code_raw, b.code_normalized, b.block_kind, b.tags, b.source_origin, \
+         b.source_file, b.created_at, b.updated_at \
+         FROM blocks b JOIN blocks_fts f ON f.rowid = b.id \
+         WHERE blocks_fts MATCH ?1 ORDER BY rank"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let query_with_wildcard = format!("{query}*");
+    let rows = stmt.query_map(params![query_with_wildcard], map_block)?;
+    rows.collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(AppError::from)
+}
+
 // --- Shaders ---
 
 pub fn insert_shader(conn: &Connection, input: &NewShaderInput) -> Result<i64, AppError> {
+    if let Some(existing) = find_shader_by_hash(conn, &input.hash)? {
+        return Err(AppError::Duplicate {
+            existing_id: existing.id,
+        });
+    }
+
     conn.execute(
         "INSERT INTO shaders (name, description, code_assembled, hash) VALUES (?1, ?2, ?3, ?4)",
         params![
@@ -206,6 +257,27 @@ pub fn insert_shader(conn: &Connection, input: &NewShaderInput) -> Result<i64, A
     }
 
     Ok(shader_id)
+}
+
+pub fn find_shader_by_hash(
+    conn: &Connection,
+    hash: &str,
+) -> Result<Option<ShaderSummaryDto>, AppError> {
+    conn.query_row(
+        "SELECT id, name, description, created_at, updated_at FROM shaders WHERE hash = ?1",
+        params![hash],
+        |row| {
+            Ok(ShaderSummaryDto {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                description: row.get(2)?,
+                created_at: row.get(3)?,
+                updated_at: row.get(4)?,
+            })
+        },
+    )
+    .optional()
+    .map_err(AppError::from)
 }
 
 pub fn list_shaders(conn: &Connection) -> Result<Vec<ShaderSummaryDto>, AppError> {

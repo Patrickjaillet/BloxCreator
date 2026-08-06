@@ -1,3 +1,4 @@
+mod commands;
 mod db;
 mod error;
 mod hashing;
@@ -5,6 +6,19 @@ mod models;
 mod parser;
 
 use tauri::Manager;
+
+use commands::blocks::{
+    check_duplicate, compute_hash_preview, create_block, delete_block, get_blocks,
+    get_genres_and_categories, rename_function_in_block, search_blocks, update_block,
+};
+use commands::import::{
+    confirm_fragment_import, decompose_monaco_content, import_markdown_content,
+    import_markdown_file,
+};
+use commands::shaders::{
+    assemble_shader_preview, delete_shader, export_shader_as_glsl, list_shaders, load_shader,
+    save_shader,
+};
 
 #[tauri::command]
 fn get_app_version(app_handle: tauri::AppHandle) -> String {
@@ -24,7 +38,28 @@ pub fn run() {
             app.manage(db::Db(std::sync::Mutex::new(conn)));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_app_version])
+        .invoke_handler(tauri::generate_handler![
+            get_app_version,
+            import_markdown_file,
+            import_markdown_content,
+            decompose_monaco_content,
+            confirm_fragment_import,
+            get_genres_and_categories,
+            get_blocks,
+            search_blocks,
+            create_block,
+            update_block,
+            delete_block,
+            compute_hash_preview,
+            check_duplicate,
+            assemble_shader_preview,
+            save_shader,
+            list_shaders,
+            load_shader,
+            delete_shader,
+            export_shader_as_glsl,
+            rename_function_in_block,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
