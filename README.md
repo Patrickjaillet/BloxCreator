@@ -1,10 +1,12 @@
 # Blox Creator
 
+[![CI](https://github.com/Patrickjaillet/BloxCreator/actions/workflows/ci.yml/badge.svg)](https://github.com/Patrickjaillet/BloxCreator/actions/workflows/ci.yml)
+
 Offline desktop application to manage and assemble reusable GLSL code blocks into complete, Shadertoy-compatible shaders.
 
 ## Status
 
-`v1.0.0`. The core pipeline is functional end-to-end: import a Markdown block library or decompose pasted GLSL, browse and search the block database, assemble blocks visually with live conflict detection, and preview the result in real time. The Windows build (NSIS/MSI) has been produced and tested; the Linux and macOS bundle targets are configured but not yet built or tested on those platforms. See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for details.
+`v1.0.0`. The core pipeline is functional end-to-end: import a Markdown block library or decompose pasted GLSL, browse and search the block database, assemble blocks visually with live conflict detection, and preview the result in real time. The Windows build (NSIS/MSI) has been produced and manually tested; Linux and macOS builds are validated by the [CI workflow](.github/workflows/ci.yml) on every push. See [`docs/CHANGELOG.md`](docs/CHANGELOG.md) for details.
 
 ## Features
 
