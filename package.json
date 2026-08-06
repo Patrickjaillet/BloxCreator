@@ -12,11 +12,13 @@
   "dependencies": {
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
-    "monaco-editor": "^0.53.0"
+    "monaco-editor": "^0.53.0",
+    "sortablejs": "^1.15.7"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
     "@types/node": "^26.1.2",
+    "@types/sortablejs": "^1.15.9",
     "typescript": "~5.6.2",
     "vite": "^6.0.3"
   },

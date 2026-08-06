@@ -2,6 +2,7 @@ import { callCommand } from "../../api/ipc";
 import { refreshLibrary } from "../../state/libraryActions";
 import { appStore } from "../../state/store";
 import type { BlockKind, DecomposedFragmentDto, NewBlockRequest } from "../../types/dto";
+import { AssemblerTab } from "./AssemblerTab";
 import { MonacoHost } from "./MonacoHost";
 
 type EditorTab = "editor" | "assembler";
@@ -33,8 +34,9 @@ export class EditorPanel {
   private readonly editorTabContent: HTMLDivElement;
   private readonly assemblerTabContent: HTMLDivElement;
   private readonly monacoHost: MonacoHost;
+  private readonly assemblerTab: AssemblerTab;
 
-  constructor() {
+  constructor(onAssemblerInject: () => void) {
     this.element = document.createElement("div");
     this.element.className = "editor-panel";
 
@@ -58,7 +60,9 @@ export class EditorPanel {
 
     this.assemblerTabContent = document.createElement("div");
     this.assemblerTabContent.className = "editor-panel__assembler-tab";
-    this.assemblerTabContent.textContent = "Assembler — coming in a later phase.";
+
+    this.assemblerTab = new AssemblerTab(onAssemblerInject);
+    this.assemblerTabContent.appendChild(this.assemblerTab.element);
 
     this.monacoHost = new MonacoHost(appStore.getState().monacoContent, (value) => {
       appStore.setState({ monacoContent: value });
@@ -92,6 +96,9 @@ export class EditorPanel {
     this.assemblerTabContent.style.display = tab === "assembler" ? "" : "none";
     this.editorTabButton.classList.toggle("editor-panel__tab--active", tab === "editor");
     this.assemblerTabButton.classList.toggle("editor-panel__tab--active", tab === "assembler");
+    if (tab === "assembler") {
+      void this.assemblerTab.refreshPalette();
+    }
   }
 
   private async handleDecompose(): Promise<void> {
@@ -237,6 +244,7 @@ export class EditorPanel {
 
     await callCommand("confirm_fragment_import", { fragments: requests });
     await refreshLibrary();
+    await this.assemblerTab.refreshPalette();
     overlay.remove();
   }
 }

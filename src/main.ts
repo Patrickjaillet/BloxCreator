@@ -17,8 +17,15 @@ async function bootstrap(): Promise<void> {
   const libraryPanel = new LibraryPanel((block) => {
     appStore.setState({ monacoContent: block.codeRaw });
   });
-  const editorPanel = new EditorPanel();
-  const viewportPanel = new ViewportPanel((line) => editorPanel.revealLine(line));
+
+  // EditorPanel and ViewportPanel each need a callback into the other
+  // (inject-and-run, click-error-to-reveal-line); both closures resolve once
+  // both panels are constructed below.
+  let viewportPanel: ViewportPanel | undefined;
+  let editorPanel: EditorPanel | undefined;
+
+  editorPanel = new EditorPanel(() => viewportPanel?.compileAndRun());
+  viewportPanel = new ViewportPanel((line) => editorPanel?.revealLine(line));
 
   root.append(libraryPanel.element, editorPanel.element, viewportPanel.element);
 }
