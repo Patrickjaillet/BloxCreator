@@ -1,6 +1,8 @@
 mod db;
 mod error;
+mod hashing;
 mod models;
+mod parser;
 
 use tauri::Manager;
 
