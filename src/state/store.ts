@@ -1,3 +1,4 @@
+import { EMPTY_SHADERTOY_TEMPLATE } from "./editorContent";
 import type { BlockDto, BlockFilter, FunctionConflict, GenreTreeDto } from "../types/dto";
 
 export interface AssemblerEntry {
@@ -35,7 +36,7 @@ export function createInitialAppState(): AppState {
     blocks: [],
     activeFilter: {},
     searchQuery: "",
-    monacoContent: "",
+    monacoContent: EMPTY_SHADERTOY_TEMPLATE,
     assemblerSelection: [],
     functionConflicts: [],
     viewport: { playing: true, time: 0, mouse: [0, 0, 0, 0] },

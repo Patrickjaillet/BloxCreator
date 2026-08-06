@@ -4,8 +4,8 @@ import { EditorPanel } from "./panels/editor/EditorPanel";
 import { LibraryPanel } from "./panels/library/LibraryPanel";
 import { ViewportPanel } from "./panels/viewport/ViewportPanel";
 import { registerShortcuts } from "./shortcuts";
+import { integrateBlockIntoEditor } from "./state/libraryActions";
 import { saveCurrentShader } from "./state/shaderActions";
-import { appStore } from "./state/store";
 
 async function bootstrap(): Promise<void> {
   const appVersion = await callCommand("get_app_version", {});
@@ -26,7 +26,7 @@ async function bootstrap(): Promise<void> {
   panelsRow.className = "app-panels-row";
 
   const libraryPanel = new LibraryPanel((block) => {
-    appStore.setState({ monacoContent: block.codeRaw });
+    integrateBlockIntoEditor(block);
   });
 
   let viewportPanel: ViewportPanel | undefined;
