@@ -12,8 +12,7 @@
   "dependencies": {
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
-    "monaco-editor": "^0.53.0",
-    "vite-plugin-monaco-editor": "^1.1.0"
+    "monaco-editor": "^0.53.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

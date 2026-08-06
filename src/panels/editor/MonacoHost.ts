@@ -1,6 +1,7 @@
 import * as monaco from "monaco-editor";
 
 import type { CompileError } from "../../state/store";
+import { configureMonacoEnvironment } from "./monacoWorkers";
 
 const GLSL_LANGUAGE_ID = "glsl";
 const GLSL_KEYWORDS = [
@@ -78,6 +79,7 @@ export class MonacoHost {
   private readonly editor: monaco.editor.IStandaloneCodeEditor;
 
   constructor(initialValue: string, onChange: (value: string) => void) {
+    configureMonacoEnvironment();
     registerGlslLanguageOnce();
 
     this.element = document.createElement("div");

@@ -1,6 +1,7 @@
 import { callCommand } from "./api/ipc";
 import { EditorPanel } from "./panels/editor/EditorPanel";
 import { LibraryPanel } from "./panels/library/LibraryPanel";
+import { ViewportPanel } from "./panels/viewport/ViewportPanel";
 import { appStore } from "./state/store";
 
 async function bootstrap(): Promise<void> {
@@ -17,8 +18,9 @@ async function bootstrap(): Promise<void> {
     appStore.setState({ monacoContent: block.codeRaw });
   });
   const editorPanel = new EditorPanel();
+  const viewportPanel = new ViewportPanel((line) => editorPanel.revealLine(line));
 
-  root.append(libraryPanel.element, editorPanel.element);
+  root.append(libraryPanel.element, editorPanel.element, viewportPanel.element);
 }
 
 window.addEventListener("DOMContentLoaded", () => {
